@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,11 +26,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.aerlingusassessment.domain.usecases.PerformCalculationUseCase
 import com.example.aerlingusassessment.ui.ButtonWithText
 import com.example.aerlingusassessment.ui.NumberOnlyTextField
 import com.example.aerlingusassessment.ui.theme.AerLingusAssessmentTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.update
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +48,8 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun MainScreen(viewModel: MainActivityViewModel = viewModel()) {
+    fun MainScreen() {
+        val viewModel: MainActivityViewModel by viewModels()
         var firstNumber by remember { mutableStateOf("") }
         var secondNumber by remember { mutableStateOf("") }
         var selectedMethod by remember {
@@ -96,23 +101,23 @@ class MainActivity : ComponentActivity() {
             ) {
                 ButtonWithText(buttonText = "+") {
                     selectedMethod = SelectedCalculationMethod.ADDITION
-                    performCalculation(selectedMethod, firstNumber, secondNumber, viewModel)
+                    viewModel.performCalculation(selectedMethod, firstNumber, secondNumber)
                 }
 
                 ButtonWithText(buttonText = "-") {
                     selectedMethod = SelectedCalculationMethod.SUBTRACTION
-                    performCalculation(selectedMethod, firstNumber, secondNumber, viewModel)
+                    viewModel.performCalculation(selectedMethod, firstNumber, secondNumber)
 
                 }
 
                 ButtonWithText(buttonText = "*") {
                     selectedMethod = SelectedCalculationMethod.MULTIPLICATION
-                    performCalculation(selectedMethod, firstNumber, secondNumber, viewModel)
+                    viewModel.performCalculation(selectedMethod, firstNumber, secondNumber)
                 }
 
                 ButtonWithText(buttonText = "/") {
                     selectedMethod = SelectedCalculationMethod.DIVISION
-                    performCalculation(selectedMethod, firstNumber, secondNumber, viewModel)
+                    viewModel.performCalculation(selectedMethod, firstNumber, secondNumber)
                 }
             }
 
@@ -125,24 +130,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun performCalculation(
-        method: SelectedCalculationMethod,
-        firstNumber: String,
-        secondNumber: String,
-        viewModel: MainActivityViewModel
-    ) {
-        if (firstNumber.isNotEmpty() && secondNumber.isNotEmpty()) {
-            val firstNumberAsInt = firstNumber.toInt()
-            val secondNumberAsInt = secondNumber.toInt()
-            val answerFromOperation = method.operation(firstNumberAsInt, secondNumberAsInt)
-            viewModel.updateAnswer(answerFromOperation)
-        }
-    }
-
     @Preview(showBackground = true)
     @Composable
     fun MainScreenPreview() {
         AerLingusAssessmentTheme {
+            val viewModel: MainActivityViewModel by viewModels()
             MainScreen()
         }
     }
